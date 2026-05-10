@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}{{ product.name }} | Velo{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'shop:product_list' %}">Главная</a></li>
+        <li class="breadcrumb-item active">{{ product.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row bg-white p-4 rounded shadow-sm">
+        <div class="col-md-6">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
+            <h1>{{ product.name }}</h1>
+            <p class="h2 text-success my-4">{{ product.price }} ₽</p>
+            
+            <div class="d-grid gap-2">
+                <button class="btn btn-warning btn-lg">Добавить в корзину</button>
+            </div>
+
+            <div class="mt-5">
+                <h4>Описание товара</h4>
+                <p class="text-muted">{{ product.description|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

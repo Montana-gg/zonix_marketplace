@@ -1,10 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}Магазин электроники | Velo{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Наши товары</h2>
+
+    <div class="row">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #fff; padding: 10px;">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                        {% else %}
+                            <span class="text-muted">Нет фото</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'shop:product_detail' product.id product.slug %}" class="text-decoration-none text-dark fw-bold">
+                                {{ product.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-success fs-4 fw-bold">{{ product.price }} ₽</p>
+                        <div class="d-grid">
+                            <button class="btn btn-warning fw-bold">В корзину</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p class="alert alert-info">Товаров пока нет. Загляните позже!</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
