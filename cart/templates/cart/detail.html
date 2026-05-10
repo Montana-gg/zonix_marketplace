@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Ваша корзина | VELO DIGITAL{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Ваша корзина</h1>
+
+  <div class="bg-white p-4 rounded shadow-sm">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Изображение</th>
+          <th>Товар</th>
+          <th>Количество</th>
+          <th>Цена за ед.</th>
+          <th>Общая стоимость</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+          {% with product=item.product %}
+            <tr>
+              <td>
+                {% if product.image %}
+                  <img src="{{ product.image.url }}" style="width: 50px;">
+                {% endif %}
+              </td>
+              <td>{{ product.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.price }} ₽</td>
+              <td>{{ item.total_price }} ₽</td>
+            </tr>
+          {% endwith %}
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-4">Ваша корзина пока пуста.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if cart %}
+      <div class="text-end mt-4">
+        <h3>Итого: <span class="text-success">{{ cart.get_total_price }} ₽</span></h3>
+        <hr>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-secondary me-2">Продолжить покупки</a>
+        <a href="#" class="btn btn-success btn-lg">Оформить заказ</a>
+      </div>
+    {% else %}
+      <div class="text-center">
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Вернуться в магазин</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
