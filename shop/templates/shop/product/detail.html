@@ -21,9 +21,21 @@
             <h1>{{ product.name }}</h1>
             <p class="h2 text-success my-4">{{ product.price }} ₽</p>
             
-            <div class="d-grid gap-2">
-                <button class="btn btn-warning btn-lg">Добавить в корзину</button>
-            </div>
+            <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-auto">
+                        <label class="col-form-label fw-bold">Количество:</label>
+                    </div>
+                    <div class="col-auto">
+                        {{ cart_product_form.quantity }}
+                    </div>
+                </div>
+                {{ cart_product_form.override }}
+                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                    Добавить в корзину
+                </button>
+            </form>
 
             <div class="mt-5">
                 <h4>Описание товара</h4>

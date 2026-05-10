@@ -27,9 +27,14 @@
                         <div class="d-grid">
                             <form action="{% url 'cart:cart_add' product.id %}" method="post">
                                 {% csrf_token %}
-                                {{ cart_product_form }}
-                                <input type="submit" value="В корзину" class="btn btn-warning fw-bold w-100 mt-2">
-                            </form>                        </div>
+                                <div class="mb-2">
+                                    {{ cart_product_form.quantity }}
+                                </div>
+                                {{ cart_product_form.override }}
+                                <button type="submit" class="btn btn-warning fw-bold w-100">
+                                    Добавить в корзину
+                                </button>
+                            </form>                       </div>
                     </div>
                 </div>
             </div>
