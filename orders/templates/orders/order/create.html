@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+    <h1>Оформление заказа</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post" class="card p-4 shadow-sm">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success btn-lg mt-3">Подтвердить заказ</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 bg-light">
+                <h3>Ваш заказ</h3>
+                <ul class="list-unstyled">
+                    {% for item in cart %}
+                        <li>{{ item.quantity }}x {{ item.product.name }} — <span>{{ item.total_price }} ₽</span></li>
+                    {% endfor %}
+                </ul>
+                <hr>
+                <p class="h4">Итого: {{ cart.get_total_price }} ₽</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

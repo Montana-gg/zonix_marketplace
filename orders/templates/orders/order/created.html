@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Спасибо за заказ!{% endblock %}
+
+{% block content %}
+    <div class="text-center py-5">
+        <h1 class="display-4 text-success">Заказ принят!</h1>
+        <p class="lead">Номер вашего заказа: <strong>{{ order.id }}</strong></p>
+        <p>Мы свяжемся с вами в ближайшее время для уточнения деталей доставки.</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3">Вернуться за покупками</a>
+    </div>
+{% endblock %}
