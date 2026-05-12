@@ -6,15 +6,16 @@ from cart.forms import CartAddProductForm
 def product_list(request, category_slug=None):
     category = None
     categories = Category.objects.filter(parent=None)
-
     products = Product.objects.filter(available=True)
 
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=category)
+        # Находим саму категорию и всех её "детей"
+        category_ids = [category.id] + list(category.children.values_list('id', flat=True))
+        # Фильтруем товары, которые входят в этот список ID
+        products = products.filter(category_id__in=category_ids)
 
     cart_product_form = CartAddProductForm()
-
     return render(request, 'shop/product/list.html', {
         'category': category,
         'categories': categories,
