@@ -1,47 +1,91 @@
 {% extends "base.html" %}
 
-{% block title %}Магазин электроники | Velo{% endblock %}
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Магазин электроники | Velo{% endif %}
+{% endblock %}
 
 {% block content %}
-    <h2 class="mb-4">Наши товары</h2>
+<div class="row">
+    <div class="col-md-3">
+        <h4 class="mb-3">Категории</h4>
+        <div class="list-group shadow-sm">
+            <a href="{% url 'shop:product_list' %}"
+               class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
+                Все товары
+            </a>
 
-    <div class="row">
-        {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #fff; padding: 10px;">
-                        {% if product.image %}
-                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                        {% else %}
-                            <span class="text-muted">Нет фото</span>
+            {% for c in categories %}
+                <div class="list-group-item p-0">
+                    <a href="{{ c.get_absolute_url }}"
+                       class="d-block p-3 text-decoration-none {% if category.slug == c.slug %}bg-light fw-bold text-primary{% else %}text-dark{% endif %}">
+                        {{ c.name }}
+                        {% if c.children.all %}
+                            <span class="float-end">›</span>
                         {% endif %}
-                    </div>
+                    </a>
 
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="{% url 'shop:product_detail' product.id product.slug %}" class="text-decoration-none text-dark fw-bold">
-                                {{ product.name }}
-                            </a>
-                        </h5>
-                        <p class="card-text text-success fs-4 fw-bold">{{ product.price }} ₽</p>
-                        <div class="d-grid">
-                            <form action="{% url 'cart:cart_add' product.id %}" method="post">
-                                {% csrf_token %}
-                                <div class="mb-2">
-                                    {{ cart_product_form.quantity }}
-                                </div>
-                                {{ cart_product_form.override }}
-                                <button type="submit" class="btn btn-warning fw-bold w-100">
-                                    Добавить в корзину
-                                </button>
-                            </form>                       </div>
+                    {% if c.children.all %}
+                        <div class="ps-3 pb-2 bg-light">
+                            {% for child in c.children.all %}
+                                <a href="{{ child.get_absolute_url }}"
+                                   class="d-block py-1 px-2 small text-decoration-none border-start {% if category.slug == child.slug %}text-primary fw-bold border-primary{% else %}text-muted border-secondary{% endif %}">
+                                    {{ child.name }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <h2 class="mb-4">
+            {% if category %}{{ category.name }}{% else %}Наши товары{% endif %}
+        </h2>
+
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div style="height: 180px; display: flex; align-items: center; justify-content: center; background: #fff; padding: 10px;">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            {% else %}
+                                <span class="text-muted">Нет фото</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">
+                                <a href="{% url 'shop:product_detail' product.id product.slug %}" class="text-decoration-none text-dark fw-bold">
+                                    {{ product.name }}
+                                </a>
+                            </h6>
+                            <p class="card-text text-success fs-5 fw-bold mt-auto">{{ product.price }} ₽</p>
+
+                            <div class="d-grid mt-2">
+                                <form action="{% url 'cart:cart_add' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="input-group input-group-sm mb-2">
+                                        <label class="input-group-text" for="quantity">Шт</label>
+                                        {{ cart_product_form.quantity }}
+                                    </div>
+                                    {{ cart_product_form.override }}
+                                    <button type="submit" class="btn btn-warning btn-sm fw-bold w-100">
+                                        🛒 В корзину
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <p class="alert alert-info">Товаров пока нет. Загляните позже!</p>
-            </div>
-        {% endfor %}
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="alert alert-light border">В этой категории пока нет товаров. Загляните позже!</p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
+</div>
 {% endblock %}
