@@ -8,31 +8,47 @@
     <style>
         .navbar { background-color: #232f3e; }
         .footer { background-color: #131a22; color: white; padding: 20px 0; margin-top: 50px; }
+        /* Сделаем ссылку на профиль красивой */
+        .profile-link { color: #ffc107; text-decoration: none; font-weight: bold; }
+        .profile-link:hover { color: #ffffff; text-decoration: underline; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark mb-4">
+    <nav class="navbar navbar-dark mb-4 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'shop:product_list' %}">VELO</a>
-            <form class="d-flex w-50">
-                <input class="form-control me-2" type="search" placeholder="Поиск товаров...">
+            <a class="navbar-brand fw-bold" href="{% url 'shop:product_list' %}">VELO</a>
+
+            <form class="d-flex w-50" action="{% url 'shop:product_list' %}" method="get">
+                <input class="form-control me-2" type="search" name="query" placeholder="Поиск товаров..." aria-label="Search">
                 <button class="btn btn-outline-warning" type="submit">Найти</button>
             </form>
-                <div class="d-flex align-items-center">
-                    {% if user.is_authenticated %}
-                        <span class="text-light me-3">Привет, <strong>{{ user.username }}</strong>!</span>
-                        <form action="{% url 'logout' %}" method="post" class="me-2">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Выйти</button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Войти</a>
-                    {% endif %}
 
-                    <a href="{% url 'cart:cart_detail' %}" class="btn btn-warning position-relative">
-                        🛒 Корзина
-                        </a>
-                </div>
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+                    <span class="text-light me-3">
+                        Привет, <a href="{% url 'profile' %}" class="profile-link">{{ user.username }}</a>!
+                    </span>
+
+                    <form action="{% url 'logout' %}" method="post" class="me-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Войти</a>
+                    <a href="{% url 'register' %}" class="btn btn-warning me-2">Регистрация</a>
+                {% endif %}
+
+                <a href="{% url 'cart:cart_detail' %}" class="btn btn-warning position-relative">
+                    🛒 Корзина
+                    {% with total_items=cart|length %}
+                        {% if total_items > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                {{ total_items }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+            </div>
         </div>
     </nav>
 

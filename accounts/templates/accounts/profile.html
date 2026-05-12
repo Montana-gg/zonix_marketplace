@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет | VELO{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted small">{{ user.email }}</p>
+                    <hr>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">Выйти из аккаунта</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h3 class="mb-4">Мои заказы</h3>
+            {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover border shadow-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Заказ №</th>
+                                <th>Дата</th>
+                                <th>Статус</th>
+                                <th>Сумма</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td><strong>#{{ order.id }}</strong></td>
+                                    <td>{{ order.created|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        {% if order.paid %}
+                                            <span class="badge bg-success">Оплачен</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">В обработке</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ order.get_total_cost }} ₽</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-light border text-center py-5">
+                    <p class="mb-3">Вы еще не совершали покупок.</p>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Начать шоппинг</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -8,6 +8,11 @@ def product_list(request, category_slug=None):
     categories = Category.objects.filter(parent=None)
     products = Product.objects.filter(available=True)
 
+    # ПОИСК: если в URL есть ?query=...
+    query = request.GET.get('query')
+    if query:
+        products = products.filter(name__icontains=query)
+
     if category_slug:
         category = get_object_or_404(Category, slug=category_slug)
         # Находим саму категорию и всех её "детей"
