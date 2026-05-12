@@ -52,7 +52,15 @@
     </div>
 
     <div class="col-md-9">
-        <h2 class="mb-4">{% if category %}{{ category.name }}{% else %}Наши товары{% endif %}</h2>
+        <h2 class="mb-4">
+            {% if query %}
+                Результаты поиска по запросу: "{{ query }}"
+            {% elif category %}
+                {{ category.name }}
+            {% else %}
+                Наши товары
+            {% endif %}
+        </h2>
         <div class="row">
             {% for product in products %}
                 <div class="col-md-6 col-lg-4 mb-4">

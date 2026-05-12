@@ -3,6 +3,14 @@ from django.conf import settings
 from shop.models import Product
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'Новый'),
+        ('paid', 'Оплачен'),
+        ('shipped', 'Отправлен'),
+        ('completed', 'Завершен'),
+        ('canceled', 'Отменен'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -12,6 +20,14 @@ class Order(models.Model):
     city = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='new',
+        verbose_name="Статус заказа"
+    )
+
     paid = models.BooleanField(default=False)
 
     class Meta:

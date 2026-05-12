@@ -5,58 +5,83 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4 border-0">
                 <div class="card-body text-center">
-                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; font-size: 1.8rem;">
                         {{ user.username|first|upper }}
                     </div>
-                    <h4>{{ user.username }}</h4>
-                    <p class="text-muted small">{{ user.email }}</p>
+                    <h5 class="mb-0">{{ user.username }}</h5>
+                    <p class="text-muted small mb-3">{{ user.email }}</p>
                     <hr>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">Выйти из аккаунта</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">Выйти</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-9">
             <h3 class="mb-4">Мои заказы</h3>
             {% if orders %}
-                <div class="table-responsive">
-                    <table class="table table-hover border shadow-sm">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Заказ №</th>
-                                <th>Дата</th>
-                                <th>Статус</th>
-                                <th>Сумма</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
+                <div class="card shadow-sm border-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td><strong>#{{ order.id }}</strong></td>
-                                    <td>{{ order.created|date:"d.m.Y H:i" }}</td>
-                                    <td>
-                                        {% if order.paid %}
-                                            <span class="badge bg-success">Оплачен</span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark">В обработке</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ order.get_total_cost }} ₽</td>
+                                    <th class="ps-3">№</th>
+                                    <th>Товары</th>
+                                    <th>Дата</th>
+                                    <th>Статус</th>
+                                    <th class="text-end pe-3">Сумма</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                    <tr>
+                                        <td class="ps-3"><strong>#{{ order.id }}</strong></td>
+
+                                        <td style="min-width: 200px;">
+                                            <div class="small">
+                                                {% for item in order.items.all %}
+                                                    <div class="text-dark">• {{ item.product.name }} <span class="text-muted">x {{ item.quantity }}</span></div>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+
+                                        <td class="small text-muted text-nowrap">
+                                            {{ order.created|date:"d.m.Y" }}<br>
+                                            {{ order.created|date:"H:i" }}
+                                        </td>
+
+                                        <td>
+                                            {% if order.status == 'new' %}
+                                                <span class="badge bg-secondary">Новый</span>
+                                            {% elif order.status == 'paid' %}
+                                                <span class="badge bg-primary">Оплачен</span>
+                                            {% elif order.status == 'shipped' %}
+                                                <span class="badge bg-info text-dark">В пути</span>
+                                            {% elif order.status == 'completed' %}
+                                                <span class="badge bg-success">Доставлен</span>
+                                            {% elif order.status == 'canceled' %}
+                                                <span class="badge bg-danger">Отменен</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-end pe-3 fw-bold text-nowrap">
+                                            {{ order.get_total_cost }} ₽
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             {% else %}
-                <div class="alert alert-light border text-center py-5">
-                    <p class="mb-3">Вы еще не совершали покупок.</p>
-                    <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Начать шоппинг</a>
+                <div class="alert alert-light border text-center py-5 shadow-sm">
+                    <p class="text-muted mb-3">История заказов пуста.</p>
+                    <a href="{% url 'shop:product_list' %}" class="btn btn-warning fw-bold">За покупками!</a>
                 </div>
             {% endif %}
         </div>

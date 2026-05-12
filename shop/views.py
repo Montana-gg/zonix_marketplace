@@ -25,7 +25,8 @@ def product_list(request, category_slug=None):
         'category': category,
         'categories': categories,
         'products': products,
-        'cart_product_form': cart_product_form
+        'cart_product_form': cart_product_form,
+        'query': query
     })
 
 
