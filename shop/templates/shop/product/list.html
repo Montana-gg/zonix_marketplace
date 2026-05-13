@@ -99,6 +99,26 @@
         font-weight: 600;
         background: transparent !important;
     }
+    /* Стиль самой стрелки — делаем темнее и чуть жирнее */
+    .arrow-icon {
+        font-size: 0.9rem; /* Немного увеличим */
+        transition: transform 0.3s ease;
+        display: inline-block;
+        color: #334155; /* Глубокий темно-серый (Slate 700) */
+        -webkit-text-stroke: 0.5px; /* Добавит легкую толщину, если иконка кажется тонкой */
+    }
+
+    /* Поворот стрелки при раскрытии */
+    .category-toggle[aria-expanded="true"] .arrow-icon {
+        transform: rotate(90deg);
+        color: #1e40af; /* Насыщенный синий при раскрытии */
+    }
+
+    /* Эффект при наведении на всю строку категории */
+    .list-group-item:hover .arrow-icon {
+        color: #0f172a; /* Почти черный при наведении */
+    }
+}
 </style>
 
 <div class="row">
@@ -119,20 +139,22 @@
                             </a>
 
                             {% if c.children.all %}
-                            <button class="btn btn-link text-decoration-none text-dark pe-3" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#sub-{{ c.id }}">
-                                {% if category.slug == c.slug or category.parent.slug == c.slug %}▾{% else %}▸{% endif %}
+                            <button class="btn category-toggle pe-3" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#sub-{{ c.id }}"
+                                    aria-expanded="{% if category.slug == c.slug or category.parent.slug == c.slug %}true{% else %}false{% endif %}">
+                                <i class="bi bi-chevron-right arrow-icon"></i>
                             </button>
                             {% endif %}
                         </div>
 
                         {% if c.children.all %}
                         <div class="collapse {% if category.slug == c.slug or category.parent.slug == c.slug %}show{% endif %}" id="sub-{{ c.id }}">
-                            <div class="ps-3 py-2 bg-light border-start border-end border-bottom rounded-bottom">
+                            <div class="ps-3 py-1 bg-light border-start border-end border-bottom rounded-bottom">
                                 {% for child in c.children.all %}
                                     <a href="{{ child.get_absolute_url }}"
                                        class="d-block py-2 px-3 small text-decoration-none {% if category.slug == child.slug %}text-primary fw-bold{% else %}text-muted{% endif %}">
-                                        • {{ child.name }}
+                                        {{ child.name }}
                                     </a>
                                 {% endfor %}
                             </div>
