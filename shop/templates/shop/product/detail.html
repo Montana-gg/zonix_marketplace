@@ -3,44 +3,120 @@
 {% block title %}{{ product.name }} | Velo{% endblock %}
 
 {% block content %}
+
+<style>
+    /* Убираем стандартные маленькие стрелки */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    /* Контейнер для выбора количества */
+    .quantity-picker {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background-color: #f8fafc;
+        padding: 5px;
+    }
+
+    /* Крупные кнопки + и - */
+    .qty-btn {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #1e293b;
+        font-size: 1.5rem;
+        font-weight: bold;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.2s;
+    }
+    .qty-btn:hover {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+
+    .qty-input {
+        width: 60px;
+        border: none !important;
+        text-align: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+</style>
+
+<div class="container mt-5">
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'shop:product_list' %}">Главная</a></li>
-        <li class="breadcrumb-item active">{{ product.name }}</li>
-      </ol>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'shop:product_list' %}">Главная</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
     </nav>
 
-    <div class="row bg-white p-4 rounded shadow-sm">
-        <div class="col-md-6">
+    <div class="row mt-4">
+        <div class="col-md-5">
             {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                <img src="{{ product.image.url }}" class="img-fluid rounded-4 shadow-sm" alt="{{ product.name }}">
             {% endif %}
         </div>
-        <div class="col-md-6">
+        <div class="col-md-7">
             <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
-            <h1>{{ product.name }}</h1>
-            <p class="h2 text-success my-4">{{ product.price }} ₽</p>
-            
-            <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mt-4">
-                {% csrf_token %}
-                <div class="row g-3 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label class="col-form-label fw-bold">Количество:</label>
+            <h1 class="display-5 fw-bold mb-3">{{ product.name }}</h1>
+            <h2 class="text-primary fw-bold mb-4">{{ product.price }} ₽</h2>
+
+            <div class="mb-4">
+                {% if product.stock > 0 %}
+                    <span class="text-success fw-bold fs-5">✓ В наличии: {{ product.stock }} шт.</span>
+                {% else %}
+                    <span class="text-danger fw-bold fs-5">✕ Нет в наличии</span>
+                {% endif %}
+            </div>
+
+            {% if product.stock > 0 %}
+                <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="fw-bold text-muted">Количество:</span>
+
+                        <div class="quantity-picker shadow-sm">
+                            <button type="button" class="qty-btn"
+                                    onclick="var el = document.getElementById('product-qty'); if(parseInt(el.value) > 1) el.value = parseInt(el.value) - 1;">
+                                −
+                            </button>
+
+                            <input type="number" id="product-qty" name="quantity" value="1"
+                                   min="1" max="{{ product.stock }}" class="qty-input" readonly>
+
+                            <button type="button" class="qty-btn"
+                                    onclick="var el = document.getElementById('product-qty'); if(parseInt(el.value) < parseInt(el.max)) el.value = parseInt(el.value) + 1;">
+                                +
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        {{ cart_product_form.quantity }}
-                    </div>
-                </div>
-                {{ cart_product_form.override }}
-                <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
-                    Добавить в корзину
-                </button>
-            </form>
+
+                    <button type="submit" class="btn btn-warning btn-lg px-5 fw-bold rounded-3">
+                        Добавить в корзину
+                    </button>
+                </form>
+            {% endif %}
 
             <div class="mt-5">
-                <h4>Описание товара</h4>
-                <p class="text-muted">{{ product.description|linebreaks }}</p>
+                <h4 class="fw-bold">Описание товара</h4>
+                <p class="text-muted lh-lg">{{ product.description|linebreaks }}</p>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
