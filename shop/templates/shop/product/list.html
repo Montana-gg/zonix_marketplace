@@ -104,22 +104,43 @@
 <div class="row">
     <div class="col-md-3">
         <h4 class="mb-3 fw-bold text-dark">Категории</h4>
-        <div class="list-group shadow-sm border-0 mb-4">
-            <a href="{% url 'shop:product_list' %}"
-               class="list-group-item list-group-item-action {% if not category %}active{% endif %} rounded mb-1">
-                Все товары
-            </a>
-            {% for c in categories %}
-                <div class="list-group-item p-0 border-0 mb-1">
-                    <div class="d-flex align-items-center bg-white border rounded">
-                        <a href="{{ c.get_absolute_url }}"
-                           class="flex-grow-1 p-3 text-decoration-none {% if category.slug == c.slug %}fw-bold text-primary{% else %}text-dark{% endif %}">
-                            {{ c.name }}
-                        </a>
+            <div class="list-group shadow-sm border-0 mb-4">
+                <a href="{% url 'shop:product_list' %}"
+                   class="list-group-item list-group-item-action {% if not category %}active{% endif %} rounded mb-1">
+                    Все товары
+                </a>
+
+                {% for c in categories %}
+                    <div class="list-group-item p-0 border-0 mb-1">
+                        <div class="d-flex align-items-center bg-white border rounded">
+                            <a href="{{ c.get_absolute_url }}"
+                               class="flex-grow-1 p-3 text-decoration-none {% if category.slug == c.slug or category.parent.slug == c.slug %}fw-bold text-primary{% else %}text-dark{% endif %}">
+                                {{ c.name }}
+                            </a>
+
+                            {% if c.children.all %}
+                            <button class="btn btn-link text-decoration-none text-dark pe-3" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#sub-{{ c.id }}">
+                                {% if category.slug == c.slug or category.parent.slug == c.slug %}▾{% else %}▸{% endif %}
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        {% if c.children.all %}
+                        <div class="collapse {% if category.slug == c.slug or category.parent.slug == c.slug %}show{% endif %}" id="sub-{{ c.id }}">
+                            <div class="ps-3 py-2 bg-light border-start border-end border-bottom rounded-bottom">
+                                {% for child in c.children.all %}
+                                    <a href="{{ child.get_absolute_url }}"
+                                       class="d-block py-2 px-3 small text-decoration-none {% if category.slug == child.slug %}text-primary fw-bold{% else %}text-muted{% endif %}">
+                                        • {{ child.name }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
-                </div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
     </div>
 
     <div class="col-md-9">
