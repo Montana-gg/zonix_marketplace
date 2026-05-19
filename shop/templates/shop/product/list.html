@@ -118,6 +118,27 @@
     .list-group-item:hover .arrow-icon {
         color: #0f172a; /* Почти черный при наведении */
     }
+    /* Анимация уменьшения-увеличения кнопки (эффект клика) */
+    @keyframes button-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.92); }
+        100% { transform: scale(1); }
+    }
+
+    /* Анимация прыжка для иконки корзины в шапке */
+    @keyframes cart-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-7px); }
+    }
+
+    .btn-pop-active {
+        animation: button-pop 0.3s ease-in-out;
+    }
+
+    .cart-bounce-active {
+        display: inline-block; /* Чтобы трансформация сработала */
+        animation: cart-bounce 0.4s ease-out;
+    }
 }
 </style>
 
@@ -228,4 +249,68 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form').forEach(form => {
+        const submitBtn = form.querySelector('.btn-impulse');
+
+        if (submitBtn) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const url = this.getAttribute('action');
+                const formData = new FormData(this);
+                const originalText = submitBtn.textContent;
+
+                // 1. Эффект нажатия на кнопку (Pop-эффект)
+                submitBtn.classList.add('btn-pop-active');
+                submitBtn.addEventListener('animationend', () => {
+                    submitBtn.classList.remove('btn-pop-active');
+                }, { once: true });
+
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 2. Сочное переключение кнопки в режим "Успех"
+                        submitBtn.innerHTML = 'Добавлено! <i class="bi bi-patch-check-fill ms-1"></i>';
+                        submitBtn.style.setProperty('background-color', '#10b981', 'important');
+                        submitBtn.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.4)';
+
+                        // 3. Заставляем корзину в шапке подпрыгнуть
+                        const cartIcon = document.querySelector('.bi-cart3');
+                        if (cartIcon) {
+                            cartIcon.classList.add('cart-bounce-active');
+                            cartIcon.addEventListener('animationend', () => {
+                                cartIcon.classList.remove('cart-bounce-active');
+                            }, { once: true });
+                        }
+
+                        // 4. Обновляем счетчик товаров в шапке
+                        let cartLink = document.querySelector('.bi-cart3')?.parentElement ||
+                                       document.querySelector('a[href*="/cart/"]');
+                        if (cartLink) {
+                            cartLink.innerHTML = `<i class="bi bi-cart3"></i> Корзина (${data.cart_total_items})`;
+                        }
+
+                        // 5. Плавно возвращаем кнопку назад через 1.5 секунды
+                        setTimeout(() => {
+                            submitBtn.textContent = originalText;
+                            submitBtn.style.setProperty('background-color', '#ff9f43', 'important');
+                            submitBtn.style.boxShadow = 'none';
+                        }, 1500);
+                    }
+                })
+                .catch(error => console.error('Ошибка AJAX:', error));
+            });
+        }
+    });
+});
+</script>
 {% endblock %}
+
