@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Спасибо за заказ!{% endblock %}
+{% block title %}Заказ оформлен | Zonix{% endblock %}
 
 {% block content %}
-    <div class="text-center py-5">
-        <h1 class="display-4 text-success">Заказ принят!</h1>
-        <p class="lead">Номер вашего заказа: <strong>{{ order.id }}</strong></p>
-        <p>Мы свяжемся с вами в ближайшее время для уточнения деталей доставки.</p>
-        <a href="{% url 'shop:product_list' %}" class="btn btn-primary mt-3">Вернуться за покупками</a>
+<div class="container my-5 text-center py-5">
+    <div class="card shadow-sm border-0 p-5 mx-auto" style="max-width: 600px;">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+        </div>
+        <h1 class="fw-bold text-dark mb-3">Спасибо за заказ!</h1>
+        <p class="lead text-muted mb-4">
+            Ваш заказ успешно создан. Номер вашего заказа: <strong class="text-primary">#{{ order.id }}</strong>.
+        </p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary btn-lg px-4 shadow-sm">
+            Продолжить покупки
+        </a>
     </div>
+</div>
 {% endblock %}

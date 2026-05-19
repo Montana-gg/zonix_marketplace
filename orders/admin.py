@@ -1,9 +1,12 @@
 from django.contrib import admin
-from .models import Order
+from .models import Order, OrderItem
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    raw_id_fields = ['product']
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    # Добавляем status в список отображения и в редактируемые поля
-    list_display = ['id', 'first_name', 'last_name', 'email', 'status', 'paid', 'created']
-    list_editable = ['status', 'paid'] # Это позволит менять статус прямо в таблице!
-    list_filter = ['status', 'paid', 'created', 'updated']
+    list_display = ['id', 'first_name', 'last_name', 'email', 'address', 'paid', 'created']
+    list_filter = ['paid', 'created', 'updated']
+    inlines = [OrderItemInline]
