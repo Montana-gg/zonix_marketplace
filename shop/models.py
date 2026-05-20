@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Category(models.Model):
     # указывает на "родительскую" категорию
@@ -46,3 +48,21 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name="Товар")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Покупатель")
+    text = models.TextField(verbose_name="Текст отзыва")
+    rating = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name="Оценка (1-5)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата публикации")
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Отзыв"
+        verbose_name = "Отзывы"
+
+    def __str__(self):
+        return f"Отзыв от {self.user.username} на {self.product.name} ({self.rating}★)"
