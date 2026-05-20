@@ -5,7 +5,7 @@
 {% block content %}
 
 <style>
-    /* Убираем стандартные маленькие стрелки */
+    /* Убираем стандартные маленькие стрелки у инпута */
     input[type="number"]::-webkit-outer-spin-button,
     input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
@@ -55,6 +55,13 @@
         background: transparent !important;
         box-shadow: none !important;
     }
+
+    /* Стили для красивого выделения выбранного размера */
+    .btn-check:checked + .style-size-btn {
+        background-color: #1e293b !important;
+        border-color: #1e293b !important;
+        color: white !important;
+    }
 </style>
 
 <div class="container mt-5">
@@ -85,8 +92,24 @@
             </div>
 
             {% if product.stock > 0 %}
-                <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mt-4">
+                <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mt-4" id="add-to-cart-form">
                     {% csrf_token %}
+
+                    {% if product.get_sizes_list %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2">Выберите размер:</label>
+                            <div class="d-flex flex-wrap gap-2" id="size-selector">
+                                {% for size in product.get_sizes_list %}
+                                    <input type="radio" class="btn-check" name="selected_size" id="size-{{ size }}" value="{{ size }}" autocomplete="off">
+                                    <label class="btn btn-outline-dark rounded-3 px-3 py-2 fw-medium style-size-btn" for="size-{{ size }}">
+                                        {{ size }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" name="size" id="size-hidden-input" value="">
+                        </div>
+                    {% endif %}
+
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="fw-bold text-muted">Количество:</span>
 
@@ -106,7 +129,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-warning btn-lg px-5 fw-bold rounded-3">
+                    <button type="submit" id="btn-add-to-cart" class="btn btn-warning btn-lg px-5 fw-bold rounded-3">
                         Добавить в корзину
                     </button>
                 </form>
@@ -153,7 +176,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="text-muted py-3">У этого товара пока нет отзывов. Станьте первым!</p>
+            <p class="text-muted py-3">У этого товара пока нет отзывов. Оставьте отзыв первым!</p>
         {% endif %}
     </div>
 
@@ -185,5 +208,30 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sizeRadioButtons = document.querySelectorAll('input[name="selected_size"]');
+    const hiddenInput = document.getElementById('size-hidden-input');
+    const form = document.getElementById('add-to-cart-form');
+
+    // Слушаем клики по радиокнопкам размеров
+    sizeRadioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            hiddenInput.value = this.value;
+        });
+    });
+
+    // Валидация перед отправкой формы
+    if (form && sizeRadioButtons.length > 0) {
+        form.addEventListener('submit', function(e) {
+            if (!hiddenInput.value) {
+                e.preventDefault(); // Останавливаем добавление в корзину
+                alert('Пожалуйста, выберите размер перед добавлением в корзину!');
+            }
+        });
+    }
+});
+</script>
 
 {% endblock %}

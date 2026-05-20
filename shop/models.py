@@ -38,6 +38,13 @@ class Product(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    sizes = models.CharField(max_length=100, blank=True, verbose_name="Доступные размеры")
+
+    def get_sizes_list(self):
+        if self.sizes:
+            return [size.strip() for size in self.sizes.split(',')]
+        return []
+
     class Meta:
         ordering = ('name',)
         indexes = [
