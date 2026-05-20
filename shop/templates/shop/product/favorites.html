@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Избранные товары | Zonix{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4 fw-bold text-dark">
+        <i class="bi bi-heart-fill text-danger me-2"></i> Моё Избранное
+    </h2>
+
+    {% if products %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for product in products %}
+                <div class="col" id="fav-card-{{ product.id }}">
+                    <div class="card h-100 border-0 bg-transparent style-clean-card position-relative">
+                        
+                        <button class="btn btn-light position-absolute rounded-circle shadow-sm btn-remove-fav" 
+                                data-product-id="{{ product.id }}"
+                                style="top: 15px; right: 15px; z-index: 10; width: 40px; height: 40px; border: none; color: #ef4444;">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+
+                        <a href="{% url 'shop:product_detail' product.id product.slug %}" 
+                           class="d-flex align-items-center justify-content-center bg-light p-4 rounded-4" 
+                           style="height: 220px; text-decoration: none;">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                            {% endif %}
+                        </a>
+
+                        <div class="card-body px-1 pt-3 pb-0 d-flex flex-column">
+                            <h4 class="fw-bold text-dark mb-1">{{ product.price }} ₽</h4>
+                            <h6 class="mb-3">
+                                <a href="{% url 'shop:product_detail' product.id product.slug %}" class="text-decoration-none text-dark fw-medium">
+                                    {{ product.name }}
+                                </a>
+                            </h6>
+                            <div class="mt-auto">
+                                <a href="{% url 'shop:product_detail' product.id product.slug %}" class="btn btn-primary w-100 rounded-3 py-2 fw-bold" style="background-color: #2563eb; border: none;">
+                                    Перейти к товару
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-heart text-muted" style="font-size: 4rem;"></i>
+            <p class="text-muted mt-3 fs-5">В избранном пока ничего нет.</p>
+            <a href="{% url 'shop:product_list' %}" class="btn btn-outline-primary rounded-3 px-4 py-2 mt-2">В каталог</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Удаление карточки прямо со страницы Избранного без перезагрузки
+    document.querySelectorAll('.btn-remove-fav').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const url = `/favorite/toggle/${productId}/`;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'removed') {
+                    // Плавно скрываем и удаляем карточку товара со страницы
+                    const card = document.getElementById(`fav-card-${productId}`);
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        card.remove();
+                        // Если товаров не осталось, перезагрузим страницу, чтобы показать заглушку "Пусто"
+                        if (document.querySelectorAll('.btn-remove-fav').length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
