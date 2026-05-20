@@ -1,24 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import OrderItem
+from .models import Order, OrderItem
 from .forms import OrderCreateForm
 from cart.cart import Cart
 
 
-# orders/views.py
 @login_required
 def order_create(request):
     cart = Cart(request)
     if request.method == 'POST':
         form = OrderCreateForm(request.POST)
         if form.is_valid():
-            # commit=False позволяет создать объект, но не сохранять его сразу в БД
             order = form.save(commit=False)
-
-            # Привязываем текущего авторизованного пользователя к заказу
             order.user = request.user
-
-            # Теперь сохраняем заказ в базу данных
             order.save()
 
             for item in cart:
@@ -33,7 +27,24 @@ def order_create(request):
                 product.save()
 
             cart.clear()
-            return render(request, 'orders/order/created.html', {'order': order})
+            # ВМЕСТО старого рендера создаем редирект на страницу оплаты
+            return redirect('orders:order_payment', order_id=order.id)
     else:
         form = OrderCreateForm()
     return render(request, 'orders/order/create.html', {'cart': cart, 'form': form})
+
+
+@login_required
+def order_payment(request, order_id):
+    # Получаем заказ, проверяя, что он принадлежит именно текущему пользователю
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == 'POST':
+        # Если пользователь нажал "Оплатить"
+        order.paid = True
+        order.status = 'Оплачен'  # Убедись, что в твоем Choices модели Order есть статус 'Оплачен'
+        order.save()
+        # После успешной оплаты отправляем на страницу "Спасибо за заказ"
+        return render(request, 'orders/order/created.html', {'order': order})
+
+    return render(request, 'orders/order/payment.html', {'order': order})

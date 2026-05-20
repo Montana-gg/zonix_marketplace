@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Оплата заказа #{{ order.id }} | Zonix{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-6">
+        <div class="card shadow border-0 text-center p-5" style="border-radius: 24px; background: #ffffff;">
+            <div class="mb-4">
+                <i class="bi bi-credit-card-2-front text-primary" style="font-size: 4rem;"></i>
+            </div>
+            
+            <h2 class="fw-bold text-dark mb-3">Оплата заказа #{{ order.id }}</h2>
+            <p class="text-muted mb-4">Пожалуйста, проверьте сумму и подтвердите оплату через безопасный шлюз Zonix Pay.</p>
+
+            <div class="p-3 bg-light rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center px-2">
+                    <span class="text-muted fw-medium">Покупатель:</span>
+                    <span class="text-dark fw-bold">{{ order.first_name }} {{ order.last_name }}</span>
+                </div>
+                <hr class="my-2 text-muted opacity-25">
+                <div class="d-flex justify-content-between align-items-center px-2">
+                    <span class="text-muted fw-medium">Итого к оплате:</span>
+                    <span class="text-primary fs-4 fw-bold">{{ order.get_total_cost }} ₽</span>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm" style="border-radius: 14px; background-color: #10b981 !important; border: none;">
+                    <i class="bi bi-shield-check me-2"></i> Оплатить заказ
+                </button>
+            </form>
+            
+            <a href="{% url 'shop:product_list' %}" class="text-decoration-none mt-3 small text-muted">Оплатить позже / Вернуться в магазин</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
