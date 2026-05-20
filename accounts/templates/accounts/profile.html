@@ -16,7 +16,9 @@
                     <hr>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">Выйти</button>
+                        <button type="button" class="btn btn-outline-danger w-100 py-2 fw-semibold rounded-3" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                            Выйти
+                        </button>
                     </form>
                 </div>
             </div>
