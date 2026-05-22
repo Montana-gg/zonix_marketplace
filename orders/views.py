@@ -1,8 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import Order, OrderItem
 from .forms import OrderCreateForm
 from cart.cart import Cart
+
+
+@login_required
+@require_POST
+def hide_order(request, order_id):
+    # Ищем заказ текущего пользователя
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    order.is_visible_to_user = False
+    order.save()
+
+    # Возвращаем пользователя обратно на страницу профиля, откуда пришел запрос
+    return redirect(request.META.get('HTTP_REFERER', '/accounts/profile/'))
 
 
 @login_required
@@ -42,9 +56,8 @@ def order_payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     if request.method == 'POST':
-        # Если пользователь нажал "Оплатить"
         order.paid = True
-        order.status = 'Оплачен'  # Убедись, что в твоем Choices модели Order есть статус 'Оплачен'
+        order.status = 'Оплачен'
         order.save()
         # После успешной оплаты отправляем на страницу "Спасибо за заказ"
         return render(request, 'orders/order/created.html', {'order': order})

@@ -5,5 +5,6 @@ app_name = 'orders'
 
 urlpatterns = [
     path('create/', views.order_create, name='order_create'),
-    path('payment/<int:order_id>/', views.order_payment, name='order_payment'), # Новый маршрут
+    path('payment/<int:order_id>/', views.order_payment, name='order_payment'),
+    path('hide/<int:order_id>/', views.hide_order, name='hide_order'),
 ]

@@ -7,7 +7,7 @@ from orders.models import Order
 @login_required
 def profile(request):
     # Берем все заказы текущего пользователя
-    orders = Order.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user, is_visible_to_user=True)
     return render(request, 'accounts/profile.html', {'orders': orders})
 
 def register(request):

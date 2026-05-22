@@ -30,6 +30,8 @@ class Order(models.Model):
 
     paid = models.BooleanField(default=False)
 
+    is_visible_to_user = models.BooleanField(default=True, verbose_name="Виден пользователю")
+
     class Meta:
         ordering = ['-created']
         indexes = [models.Index(fields=['-created'])]

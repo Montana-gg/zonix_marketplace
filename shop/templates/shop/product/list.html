@@ -269,10 +269,12 @@
                                 {% if product.stock > 0 %}
                                     {% if user.is_authenticated %}
 
-                                        {% if product.sizes %}
+                                        {% if product.get_sizes_list %}
                                             <div class="d-grid">
-                                                <a href="{% url 'shop:product_detail' product.id product.slug %}" class="btn btn-warning fw-semibold text-white shadow-sm py-2 rounded-3">
-                                                    Выбрать размер
+                                                <a href="{% url 'shop:product_detail' product.id product.slug %}"
+                                                   class="btn text-white fw-bold py-2 rounded-3 text-center"
+                                                   style="background-color: #ff9f43; border: none; font-size: 0.95rem;">
+                                                    Купить и выбрать размер
                                                 </a>
                                             </div>
                                         {% else %}

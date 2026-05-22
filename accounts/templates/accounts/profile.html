@@ -36,7 +36,8 @@
                                     <th>Товары</th>
                                     <th>Дата</th>
                                     <th>Статус</th>
-                                    <th class="text-end pe-3">Сумма</th>
+                                    <th class="text-end">Сумма</th>
+                                    <th class="text-center pe-3">Действие</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,8 +80,18 @@
                                             {% endif %}
                                         </td>
 
-                                        <td class="text-end pe-3 fw-bold text-nowrap">
+                                        <td class="text-end fw-bold text-nowrap">
                                             {{ order.get_total_cost }} ₽
+                                        </td>
+
+                                        <td class="text-center pe-3">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger border-0 p-2 rounded-3"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteOrderModal"
+                                                    data-order-id="{{ order.id }}">
+                                                <i class="bi bi-trash fs-5"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -97,4 +108,59 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0">
+                <i class="bi bi-exclamation-triangle text-danger fs-1 mb-2 d-inline-block"></i>
+                <h5 class="fw-bold mb-2">Удалить из истории?</h5>
+                <p class="text-muted small">Этот заказ больше не будет отображаться в вашем личном кабинете.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0 d-flex gap-2">
+                <button type="button" class="btn btn-light flex-grow-1 py-2 fw-medium rounded-3" data-bs-dismiss="modal">Отмена</button>
+                <form id="deleteOrderForm" action="" method="post" class="flex-grow-1 m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger w-100 py-2 fw-medium rounded-3">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center py-4">
+                <h5 class="fw-bold mb-3">Выйти из аккаунта?</h5>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Отмена</button>
+                    <form action="{% url 'logout' %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4 py-2 rounded-3">Выйти</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteOrderModal = document.getElementById('deleteOrderModal');
+    if (deleteOrderModal) {
+        deleteOrderModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const orderId = button.getAttribute('data-order-id');
+            const form = document.getElementById('deleteOrderForm');
+
+            // Формируем url вида /orders/hide/ID/
+            form.action = '/orders/hide/' + orderId + '/';
+        });
+    }
+});
+</script>
 {% endblock %}
