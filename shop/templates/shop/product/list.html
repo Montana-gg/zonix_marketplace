@@ -268,17 +268,27 @@
                             <div class="mt-auto pt-2">
                                 {% if product.stock > 0 %}
                                     {% if user.is_authenticated %}
-                                        <form action="{% url 'cart:cart_add' product.id %}" method="post">
-                                            {% csrf_token %}
-                                            <div class="d-flex gap-2">
-                                                <div class="quantity-picker">
-                                                    <button type="button" class="qty-btn" onclick="var el = document.getElementById('qty-{{ product.id }}'); if(parseInt(el.value) > 1) el.value = parseInt(el.value) - 1;">−</button>
-                                                    <input type="number" id="qty-{{ product.id }}" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input-small" readonly>
-                                                    <button type="button" class="qty-btn" onclick="var el = document.getElementById('qty-{{ product.id }}'); if(parseInt(el.value) < parseInt(el.max)) el.value = parseInt(el.value) + 1;">+</button>
-                                                </div>
-                                                <button type="submit" class="btn btn-impulse flex-grow-1">Купить</button>
+
+                                        {% if product.sizes %}
+                                            <div class="d-grid">
+                                                <a href="{% url 'shop:product_detail' product.id product.slug %}" class="btn btn-warning fw-semibold text-white shadow-sm py-2 rounded-3">
+                                                    Выбрать размер
+                                                </a>
                                             </div>
-                                        </form>
+                                        {% else %}
+                                            <form action="{% url 'cart:cart_add' product.id %}" method="post">
+                                                {% csrf_token %}
+                                                <div class="d-flex gap-2">
+                                                    <div class="quantity-picker">
+                                                        <button type="button" class="qty-btn" onclick="var el = document.getElementById('qty-{{ product.id }}'); if(parseInt(el.value) > 1) el.value = parseInt(el.value) - 1;">−</button>
+                                                        <input type="number" id="qty-{{ product.id }}" name="quantity" value="1" min="1" max="{{ product.stock }}" class="qty-input-small" readonly>
+                                                        <button type="button" class="qty-btn" onclick="var el = document.getElementById('qty-{{ product.id }}'); if(parseInt(el.value) < parseInt(el.max)) el.value = parseInt(el.value) + 1;">+</button>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-impulse flex-grow-1">Купить</button>
+                                                </div>
+                                            </form>
+                                        {% endif %}
+
                                     {% else %}
                                         <a href="{% url 'login' %}" class="btn btn-outline-blue w-100 py-2">Войти, чтобы купить</a>
                                     {% endif %}
@@ -309,10 +319,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const icon = this.querySelector('i');
             const url = `/favorite/toggle/${productId}/`;
 
-            // Получаем CSRF-токен из формы покупки, которая точно есть на странице
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
-            // Эффект пульсации при клике
             this.classList.add('heart-pulse');
             this.addEventListener('animationend', () => this.classList.remove('heart-pulse'), { once: true });
 
@@ -339,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ЛОГИКА КОРЗИНЫ (AJAX Добавление)
+    // ЛОГИКА КОРЗИНЫ (AJAX Добавление для техники)
     document.querySelectorAll('form').forEach(form => {
         const submitBtn = form.querySelector('.btn-impulse');
 

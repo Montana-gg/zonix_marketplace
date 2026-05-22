@@ -100,13 +100,12 @@
                             <label class="form-label fw-bold text-dark mb-2">Выберите размер:</label>
                             <div class="d-flex flex-wrap gap-2" id="size-selector">
                                 {% for size in product.get_sizes_list %}
-                                    <input type="radio" class="btn-check" name="selected_size" id="size-{{ size }}" value="{{ size }}" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="size" id="size-{{ size }}" value="{{ size }}" autocomplete="off">
                                     <label class="btn btn-outline-dark rounded-3 px-3 py-2 fw-medium style-size-btn" for="size-{{ size }}">
                                         {{ size }}
                                     </label>
                                 {% endfor %}
                             </div>
-                            <input type="hidden" name="size" id="size-hidden-input" value="">
                         </div>
                     {% endif %}
 
@@ -129,7 +128,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="btn-add-to-cart" class="btn btn-warning btn-lg px-5 fw-bold rounded-3">
+                    <button type="submit" id="btn-add-to-cart" class="btn btn-warning btn-lg px-5 fw-bold rounded-3 text-white">
                         Добавить в корзину
                     </button>
                 </form>
@@ -211,23 +210,24 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const sizeRadioButtons = document.querySelectorAll('input[name="selected_size"]');
-    const hiddenInput = document.getElementById('size-hidden-input');
     const form = document.getElementById('add-to-cart-form');
+    const sizeRadioButtons = document.querySelectorAll('input[name="size"]');
 
-    // Слушаем клики по радиокнопкам размеров
-    sizeRadioButtons.forEach(radio => {
-        radio.addEventListener('change', function() {
-            hiddenInput.value = this.value;
-        });
-    });
-
-    // Валидация перед отправкой формы
-    if (form && sizeRadioButtons.length > 0) {
+    if (form) {
         form.addEventListener('submit', function(e) {
-            if (!hiddenInput.value) {
-                e.preventDefault(); // Останавливаем добавление в корзину
-                alert('Пожалуйста, выберите размер перед добавлением в корзину!');
+            // Если у товара есть выбор размера, проверяем, выбрано ли что-то из радио-кнопок
+            if (sizeRadioButtons.length > 0) {
+                let anyChecked = false;
+                sizeRadioButtons.forEach(radio => {
+                    if (radio.checked) {
+                        anyChecked = true;
+                    }
+                });
+
+                if (!anyChecked) {
+                    e.preventDefault(); // Намертво блокируем отправку
+                    alert('Пожалуйста, выберите размер перед добавлением в корзину!');
+                }
             }
         });
     }

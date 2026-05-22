@@ -16,23 +16,25 @@ def order_create(request):
             order.save()
 
             for item in cart:
-                product = item['product']
+                # 1. Создаем позицию в заказе
                 OrderItem.objects.create(
                     order=order,
-                    product=product,
+                    product=item['product'],
                     price=item['price'],
-                    quantity=item['quantity']
+                    quantity=item['quantity'],
+                    size=item.get('size')  # Передаем размер из корзины в БД заказа
                 )
+
+                # 2. УМЕНЬШАЕМ КОЛИЧЕСТВО НА СКЛАДЕ:
+                product = item['product']
                 product.stock -= item['quantity']
-                product.save()
+                product.save()  # Сохраняем обновленный склад товара в БД
 
             cart.clear()
-            # ВМЕСТО старого рендера создаем редирект на страницу оплаты
-            return redirect('orders:order_payment', order_id=order.id)
+            return render(request, 'orders/order/created.html', {'order': order})
     else:
         form = OrderCreateForm()
     return render(request, 'orders/order/create.html', {'cart': cart, 'form': form})
-
 
 @login_required
 def order_payment(request, order_id):

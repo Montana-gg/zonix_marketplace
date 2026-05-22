@@ -47,7 +47,15 @@
                                         <td style="min-width: 200px;">
                                             <div class="small">
                                                 {% for item in order.items.all %}
-                                                    <div class="text-dark">• {{ item.product.name }} <span class="text-muted">x {{ item.quantity }}</span></div>
+                                                    <div class="text-dark mb-1">
+                                                        • {{ item.product.name }}
+
+                                                        {% if item.size %}
+                                                            <span class="badge bg-light text-dark border border-secondary-subtle small mx-1">Размер: {{ item.size }}</span>
+                                                        {% endif %}
+
+                                                        <span class="text-muted">x {{ item.quantity }}</span>
+                                                    </div>
                                                 {% endfor %}
                                             </div>
                                         </td>

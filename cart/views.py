@@ -12,31 +12,20 @@ def cart_add(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
 
-    # Получаем количество из POST-запроса
+    # Считываем переданное количество и размер из формы
     quantity = int(request.POST.get('quantity', 1))
+    size = request.POST.get('size', None)  # Получаем размер (M, L, XL...)
 
-    # Приводим override к булевому значению (True/False)
-    override_raw = request.POST.get('override', 'False')
-    override = override_raw in ['True', 'true', True, 1]
+    # Проверяем флаг перезаписи количества
+    override_quantity = request.POST.get('override_quantity') == 'True' or request.POST.get('override') == 'True'
 
-    # Добавляем товар в корзину ОДИН раз
-    cart.add(product=product, quantity=quantity, override_quantity=override)
+    # Передаем размер в корзину
+    cart.add(product=product,
+             quantity=quantity,
+             override_quantity=override_quantity,
+             size=size)
 
-    # Если это AJAX-запрос от JavaScript
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Безопасно считаем сумму всех товаров напрямую из словаря сессии cart.cart
-        # Это гарантирует, что отсутствие методов __len__ или __iter__ в классе ничего не сломает
-        total_items = sum(int(item['quantity']) for item in cart.cart.values())
-
-        return JsonResponse({
-            'status': 'success',
-            'cart_total_items': total_items,
-            'cart_total_price': str(cart.get_total_price())
-        })
-
-    # Обычный редирект для старых кнопок (если AJAX отключен)
     return redirect('cart:cart_detail')
-
 def cart_detail(request):
     cart = Cart(request)
     return render(request, 'cart/detail.html', {'cart': cart})
@@ -45,5 +34,15 @@ def cart_detail(request):
 def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
-    cart.remove(product) # Вызываем метод из класса Cart
+
+    # Получаем размер, чтобы удалить конкретную позицию товара
+    size = request.POST.get('size', None)
+    cart.remove(product, size=size)
+
     return redirect('cart:cart_detail')
+
+def clear_session_cart(request):
+    if 'cart' in request.session:
+        del request.session['cart']
+        request.session.modified = True
+    return redirect('shop:product_list')
