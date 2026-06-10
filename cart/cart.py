@@ -11,21 +11,28 @@ class Cart:
         self.cart = cart
 
     def add(self, product, quantity=1, override_quantity=False, size=None):
-        # Формируем уникальный ключ для корзины (например: "5_M" или "5_None")
-        item_id = f"{product.id}_{size}" if size else f"{product.id}_None"
+        """
+        Добавить товар в корзину или обновить его количество.
+        """
+        product_id = str(product.id)
 
-        if item_id not in self.cart:
-            self.cart[item_id] = {
+        if size and size != '':
+            item_key = f"{product_id}_{size}"
+        else:
+            item_key = product_id
+
+        if item_key not in self.cart:
+            self.cart[item_key] = {
+                'product_id': int(product_id),  # ИСПРАВЛЕНО: Сохраняем ID, чтобы __iter__ его нашёл!
                 'quantity': 0,
                 'price': str(product.price),
-                'product_id': product.id,
-                'size': size  # СОХРАНЯЕМ ВЫБРАННЫЙ РАЗМЕР В СЕССИЮ
+                'size': size if (size and size != '') else None
             }
 
         if override_quantity:
-            self.cart[item_id]['quantity'] = quantity
+            self.cart[item_key]['quantity'] = quantity
         else:
-            self.cart[item_id]['quantity'] += quantity
+            self.cart[item_key]['quantity'] += quantity
 
         self.save()
 
@@ -33,17 +40,29 @@ class Cart:
         self.session.modified = True
 
     def remove(self, product, size=None):
-        item_key = str(product.id)
-        if size:
-            item_key = f"{product.id}_{size}"
+        """
+        Удаление товара из корзины.
+        """
+        product_id = str(product.id)
+
+        if size and size != '':
+            item_key = f"{product_id}_{size}"
+        else:
+            item_key = product_id
+
         if item_key in self.cart:
             del self.cart[item_key]
             self.save()
 
     def __iter__(self):
+        """
+        Перебор элементов в корзине и получение продуктов из базы данных.
+        """
+        # ИСПРАВЛЕНО: Достаем ID товаров безопасно
         product_ids = [item['product_id'] for item in self.cart.values() if 'product_id' in item]
         products = Product.objects.filter(id__in=product_ids)
 
+        # Делаем копию корзины, чтобы не портить исходные сессионные данные при расчете total_price
         cart = self.cart.copy()
 
         for item_key, item in cart.items():
@@ -55,7 +74,7 @@ class Cart:
                 continue
 
             item['product'] = product
-            item['price'] = float(item['price'])
+            item['price'] = Decimal(item['price'])  # ИСПРАВЛЕНО: Лучше использовать Decimal для цен вместо float
             item['total_price'] = item['price'] * item['quantity']
             item['size'] = item.get('size', None)
 

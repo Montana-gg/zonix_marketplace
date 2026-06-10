@@ -16,6 +16,10 @@ def cart_add(request, product_id):
     quantity = int(request.POST.get('quantity', 1))
     size = request.POST.get('size', None)  # Получаем размер (M, L, XL...)
 
+    # ИСПРАВЛЕНИЕ: Если размер пришел пустой строкой, принудительно делаем его None
+    if size == '':
+        size = None
+
     # Проверяем флаг перезаписи количества
     override_quantity = request.POST.get('override_quantity') == 'True' or request.POST.get('override') == 'True'
 
@@ -26,20 +30,29 @@ def cart_add(request, product_id):
              size=size)
 
     return redirect('cart:cart_detail')
+
+
 def cart_detail(request):
     cart = Cart(request)
     return render(request, 'cart/detail.html', {'cart': cart})
+
 
 @require_POST
 def cart_remove(request, product_id):
     cart = Cart(request)
     product = get_object_or_404(Product, id=product_id)
 
-    # Получаем размер, чтобы удалить конкретную позицию товара
+    # Получаем размер, прилетевший из формы
     size = request.POST.get('size', None)
+
+    # ИСПРАВЛЕНИЕ: Если размер пришел пустой строкой (как у ноутбука), принудительно делаем его None
+    if size == '':
+        size = None
+
     cart.remove(product, size=size)
 
     return redirect('cart:cart_detail')
+
 
 def clear_session_cart(request):
     if 'cart' in request.session:

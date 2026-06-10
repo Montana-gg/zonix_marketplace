@@ -59,14 +59,18 @@
               <td>{{ item.total_price }} ₽</td>
 
               <td>
-                <form action="{% url 'cart:cart_remove' product.id %}" method="post">
-                  {% csrf_token %}
+                <form action="{% url 'cart:cart_remove' product.id %}" method="post" class="d-inline-block m-0">
+                    {% csrf_token %}
 
-                  {% if item.size %}
-                    <input type="hidden" name="size" value="{{ item.size }}">
-                  {% endif %}
+                    {% if item.size %}
+                      <input type="hidden" name="size" value="{{ item.size }}">
+                    {% else %}
+                      <input type="hidden" name="size" value="">
+                    {% endif %}
 
-                  <button type="submit" class="btn btn-sm btn-link text-danger p-0 text-decoration-none">Удалить</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                        Удалить
+                    </button>
                 </form>
               </td>
             </tr>
