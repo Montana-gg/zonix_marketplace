@@ -69,7 +69,7 @@ class Review(models.Model):
     class Meta:
         ordering = ['-created_at']
         verbose_name = "Отзыв"
-        verbose_name = "Отзывы"
+        verbose_name_plural = "Отзывы"
 
     def __str__(self):
         return f"Отзыв от {self.user.username} на {self.product.name} ({self.rating}★)"
