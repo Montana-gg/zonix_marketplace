@@ -1,10 +1,13 @@
 from decimal import Decimal
+
 from shop.models import Product
 
 
 class Cart:
     def __init__(self, request):
         self.session = request.session
+        self.user = request.user if getattr(request, 'user', None) and request.user.is_authenticated else None
+
         cart = self.session.get('cart')
         if not cart:
             cart = self.session['cart'] = {}
@@ -38,6 +41,51 @@ class Cart:
 
     def save(self):
         self.session.modified = True
+        if self.user:
+            self._sync_to_db()
+
+    def _sync_to_db(self):
+        """
+        Полностью перезаписывает сохранённую в БД корзину пользователя
+        текущим содержимым сессионной корзины. Это "зеркало", а не
+        накопление — поэтому вызывать save() повторно безопасно и не
+        приводит к задвоению количества товаров.
+        """
+        from .models import CartItem  # локальный импорт, чтобы избежать циклических зависимостей
+
+        CartItem.objects.filter(user=self.user).delete()
+        new_items = [
+            CartItem(
+                user=self.user,
+                product_id=item['product_id'],
+                quantity=item['quantity'],
+                size=item.get('size'),
+                price=Decimal(item['price']),
+            )
+            for item in self.cart.values()
+            if 'product_id' in item
+        ]
+        if new_items:
+            CartItem.objects.bulk_create(new_items)
+
+    def load_saved_cart(self):
+        """
+        Подтягивает сохранённую в БД корзину пользователя и объединяет
+        её с текущей сессионной корзиной (например, с гостевой корзиной,
+        собранной до входа в аккаунт). Вызывается один раз при логине
+        через сигнал user_logged_in — НЕ при каждом обращении к Cart,
+        иначе количество товаров задваивалось бы на каждый запрос.
+        """
+        from .models import CartItem
+
+        saved_items = CartItem.objects.filter(user=self.user).select_related('product')
+        for saved in saved_items:
+            self.add(
+                product=saved.product,
+                quantity=saved.quantity,
+                override_quantity=False,
+                size=saved.size,
+            )
 
     def remove(self, product, size=None):
         """
@@ -89,3 +137,6 @@ class Cart:
     def clear(self):
         del self.session['cart']
         self.save()
+        if self.user:
+            from .models import CartItem
+            CartItem.objects.filter(user=self.user).delete()
