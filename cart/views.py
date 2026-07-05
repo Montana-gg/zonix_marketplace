@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from django.contrib import messages
 from shop.models import Product
 from .cart import Cart
 
@@ -22,6 +23,24 @@ def cart_add(request, product_id):
 
     # Проверяем флаг перезаписи количества
     override_quantity = request.POST.get('override_quantity') == 'True' or request.POST.get('override') == 'True'
+
+    # Валидация остатков на складе: считаем, сколько этого товара
+    # УЖЕ лежит в корзине (если не перезаписываем количество, а добавляем ещё),
+    # и не даём запросить больше, чем реально есть в наличии.
+    already_in_cart = 0
+    item_key = f"{product_id}_{size}" if size else str(product_id)
+    if not override_quantity and item_key in cart.cart:
+        already_in_cart = cart.cart[item_key]['quantity']
+
+    requested_total = quantity if override_quantity else already_in_cart + quantity
+
+    if requested_total > product.stock:
+        messages.error(
+            request,
+            f'На складе доступно только {product.stock} шт. товара «{product.name}». '
+            f'Уменьшите количество.'
+        )
+        return redirect('cart:cart_detail')
 
     # Передаем размер в корзину
     cart.add(product=product,
